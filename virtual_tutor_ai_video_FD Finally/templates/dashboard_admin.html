@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Virtual Tutor AI Video</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background-color: #007bff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Admin Panel</h2>
+    <a href="/dashboard_admin">Dashboard</a>
+    <a href="/manage_users">Manage Users</a>
+    <a href="/manage_subscriptions">Subscriptions</a>
+    <a href="/logout">Logout</a>
+</div>
+
+
+<div class="content">
+    <h1>Welcome, Admin!</h1>
+    <p>This is your dashboard where you can manage users, subscriptions, analytics, and avatar settings.</p>
+</div>
+
+</body>
+</html>

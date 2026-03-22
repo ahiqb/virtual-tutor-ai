@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Virtual Tutor AI - Talking Avatar</title>
+<style>
+/* ================= GLOBAL STYLES ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f0f3f7;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ================= HEADINGS ================= */
+h2 { margin-bottom: 20px; font-size: 2rem; color: #1a1a1a; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);}
+h3 { margin-top: 30px; margin-bottom: 10px; font-size: 1.5rem; color: #444; }
+
+/* ================= FORM STYLING ================= */
+form {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 30px;
+}
+
+form label { display: block; margin: 12px 0 5px; font-weight: 600; color: #555; }
+form select, form input[type="text"], form button { width: 100%; padding: 10px 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #ccc; font-size: 1rem;}
+form select { background: #fafafa; }
+form input[type="text"] { border: 1px solid #bbb; }
+form button { background: #007bff; color: #fff; border: none; cursor: pointer; font-weight: bold; transition: background 0.3s, transform 0.2s;}
+form button:hover { background: #0056b3; transform: translateY(-2px); }
+
+/* Mic button */
+#micBtn {
+    width: 50px; padding: 10px; font-size: 1.2rem; background: #28a745; color: #fff; border-radius: 10px; border: none; cursor: pointer; margin-top: -10px; margin-left: 5px; transition: background 0.3s, transform 0.2s;
+}
+#micBtn.listening { background: #dc3545; animation: pulse 1s infinite;}
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); }}
+
+/* ================= AVATAR STYLING ================= */
+#avatar { width: 200px; height: 220px; background: linear-gradient(145deg, #e0e5ec, #ffffff); border-radius: 50%; position: relative; margin: 20px auto; box-shadow: inset -5px -5px 15px rgba(0,0,0,0.08), inset 5px 5px 15px rgba(255,255,255,0.8), 0 8px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; flex-direction: column; transition: transform 0.1s ease, box-shadow 0.3s;}
+.eye { width: 24px; height: 24px; background: #222; border-radius: 50%; position: absolute; top: 70px; box-shadow: 0 0 4px rgba(0,0,0,0.2);}
+#eye_left { left: 50px; } #eye_right { right: 50px; }
+.eye::after { content: ''; display: block; width: 8px; height: 8px; background: #fff; border-radius: 50%; position: absolute; top: 4px; left: 4px; opacity: 0.8;}
+#mouth { width: 60px; height: 20px; background: #ff4d4d; border-radius: 50px 50px 0 0; position: absolute; bottom: 50px; transition: height 0.1s ease, transform 0.2s, border-radius 0.2s;}
+.smile { border-radius: 50px 50px 50px 50px; transform: translateY(-2px);}
+.talkingGlow { box-shadow: 0 0 15px rgba(0,123,255,0.6), 0 0 30px rgba(0,123,255,0.4);}
+
+/* ================= AI RESPONSE ================= */
+#ai_text { background: #fff; padding: 15px 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); max-width: 500px; margin: 0 auto 15px auto; font-size: 1.1rem; line-height: 1.5;}
+
+/* ================= SPEECH BUTTONS ================= */
+button[onclick] { background: #17a2b8; color: #fff; border: none; padding: 10px 18px; margin-right: 10px; border-radius: 10px; cursor: pointer; transition: background 0.3s, transform 0.2s;}
+button[onclick]:hover { background: #117a8b; transform: translateY(-2px);}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) { form, #ai_text { width: 90%; } #avatar { width: 160px; height: 180px; } #eye_left, #eye_right { width: 18px; height: 18px; } #mouth { width: 50px; height: 15px; }}
+</style>
+</head>
+<body>
+
+<h2>Virtual Tutor AI - Talking Avatar</h2>
+
+<form method="POST">
+    <label>Select Avatar:</label>
+    <select name="avatar_image" id="avatarSelect">
+        {% for av in avatars %}
+        <option value="{{ av.filename }}" {% if selected_avatar == av.filename %}selected{% endif %}>{{ av.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <input type="text" name="user_input" id="user_input" placeholder="Type something..." required>
+    <button type="button" id="micBtn">🎤</button>
+    <br>
+
+    <label>Voice:</label>
+    <select name="voice" id="voice">
+        <option value="female" {% if selected_voice=="female" %}selected{% endif %}>Female</option>
+        <option value="male" {% if selected_voice=="male" %}selected{% endif %}>Male</option>
+    </select>
+    <br>
+
+    <label>Language:</label>
+    <select name="language" id="language" required>
+        <option value="en-US" {% if selected_language=="en-US" %}selected{% endif %}>English</option>
+        <option value="ur-PK" {% if selected_language=="ur-PK" %}selected{% endif %}>Urdu</option>
+        <option value="es-ES" {% if selected_language=="es-ES" %}selected{% endif %}>Spanish</option>
+        <option value="fr-FR" {% if selected_language=="fr-FR" %}selected{% endif %}>French</option>
+        <option value="de-DE" {% if selected_language=="de-DE" %}selected{% endif %}>German</option>
+    </select>
+    <br>
+
+    <button type="submit">Ask</button>
+</form>
+
+<h3>Avatar:</h3>
+<div id="avatar">
+    <div id="eye_left" class="eye"></div>
+    <div id="eye_right" class="eye"></div>
+    <div id="mouth"></div>
+</div>
+
+{% if ai_response %}
+<h3>AI Response:</h3>
+<p id="ai_text">{{ ai_response }}</p>
+<button onclick="speakText()">🔊 Listen</button>
+<button onclick="stopSpeech()">⏹ Stop</button>
+{% endif %}
+
+<script>
+
+const micBtn = document.getElementById("micBtn");
+const userInput = document.getElementById("user_input");
+
+let recognizing = false;
+let recognition;
+
+// Check if browser supports speech recognition
+if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+        recognizing = true;
+        micBtn.classList.add("listening");
+    };
+
+    recognition.onend = () => {
+        recognizing = false;
+        micBtn.classList.remove("listening");
+    };
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+        }
+        userInput.value = transcript;
+    };
+} else {
+    alert("Speech Recognition not supported in this browser.");
+}
+
+// Mic button click to start/stop recognition
+micBtn.addEventListener("click", () => {
+    if (!recognition) return;
+
+    // Set language dynamically from your dropdown
+    const langChoice = document.getElementById("language").value || 'en-US';
+    recognition.lang = langChoice;
+
+    if (recognizing) recognition.stop();
+    else recognition.start();
+});
+
+
+const mouth = document.getElementById("mouth");
+const avatar = document.getElementById("avatar");
+let talking = false;
+let utterance = null;
+
+function openMouth(level) { mouth.style.height = level + "px"; }
+
+function checkSmile(text) {
+    const smileWords = ["hello","hi","great","good","awesome","fantastic","nice","ہیلو","سلام","اچھا","زبردست","شاندار"];
+    return smileWords.some(word => text.toLowerCase().includes(word));
+}
+
+async function speakText() {
+    const textElem = document.getElementById("ai_text");
+    if (!textElem) return;
+    const text = textElem.innerText.trim();
+    if (!text) return;
+
+    const voiceChoice = document.getElementById("voice").value;
+    const langChoice = document.getElementById("language").value;
+
+    if(checkSmile(text)) mouth.classList.add("smile"); else mouth.classList.remove("smile");
+
+    // ===== URDU =====
+    if(langChoice === "ur-PK"){
+        fetch("/tts_ur", {
+            method: "POST",
+            body: new URLSearchParams({ text: text, voice: voiceChoice })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.audio){
+                let audio = new Audio(data.audio);
+                audio.play();
+                audio.onplay = () => { talking=true; avatar.classList.add("talkingGlow"); animateMouth(); microMovements(); };
+                audio.onended = () => { talking=false; openMouth(10); avatar.style.transform="translateY(0px)"; avatar.classList.remove("talkingGlow"); mouth.classList.remove("smile"); };
+            }
+        });
+        return;
+    }
+
+    // ===== OTHER LANGUAGES: browser TTS =====
+    utterance = new SpeechSynthesisUtterance(text);
+    function assignVoice() {
+        const voices = speechSynthesis.getVoices();
+        let selectedVoice = voices[0];
+        utterance.lang = langChoice;
+        if (voiceChoice === "female") selectedVoice = voices.find(v => v.name.includes("Female")) || voices[0];
+        if (voiceChoice === "male") selectedVoice = voices.find(v => v.name.includes("Male")) || voices[0];
+        utterance.voice = selectedVoice;
+
+        utterance.onstart = () => { talking=true; avatar.classList.add("talkingGlow"); animateMouth(); microMovements(); };
+        utterance.onend = () => { talking=false; openMouth(10); avatar.style.transform="translateY(0px)"; avatar.classList.remove("talkingGlow"); mouth.classList.remove("smile"); };
+
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+    }
+    if (speechSynthesis.getVoices().length === 0) speechSynthesis.onvoiceschanged = assignVoice;
+    else assignVoice();
+
+    function animateMouth() { if(!talking) return; if(!mouth.classList.contains("smile")) { const open=8+Math.random()*35; openMouth(open); setTimeout(()=>openMouth(6),70);} requestAnimationFrame(animateMouth);}
+    function microMovements() { if(!talking) return avatar.style.transform="translateY(0px)"; avatar.style.transform="translateY("+(Math.random()*2-1)+"px)"; setTimeout(microMovements,90);}
+}
+
+function stopSpeech() {
+    if(utterance){ speechSynthesis.cancel(); talking=false; openMouth(10); avatar.style.transform="translateY(0px)"; avatar.classList.remove("talkingGlow"); mouth.classList.remove("smile"); }
+}
+
+function playUrduTTS() {
+    let text = document.getElementById("text_input").value;
+    if(!text.trim()) return alert("Please enter text!");
+
+    const voiceChoice = document.getElementById("voice").value;
+
+    fetch("/tts_ur", {
+        method: "POST",
+        body: new URLSearchParams({ text: text, voice: voiceChoice })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.audio){
+            let audio = new Audio(data.audio);
+            audio.play();
+        } else {
+            alert("TTS Error: " + data.error);
+        }
+    })
+    .catch(err => alert("TTS Request Failed: " + err));
+}
+</script>
+
+</body>
+</html>

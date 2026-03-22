@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard - Virtual Tutor AI Video</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f4f4; }
+        .sidebar { width:220px; height:100vh; background-color:#28a745; position:fixed; top:0; left:0; display:flex; flex-direction:column; color:white; }
+        .sidebar h2 { text-align:center; padding:20px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
+        .sidebar a { padding:15px 20px; text-decoration:none; color:white; border-bottom:1px solid rgba(255,255,255,0.1); transition:0.3s; }
+        .sidebar a:hover { background-color:#1e7e34; }
+        .content { margin-left:220px; padding:30px; }
+        h1 { color:#333; }
+        table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+        th, td { border:1px solid #ccc; padding:10px; text-align:left; }
+        th { background:#f4f4f4; }
+        input, button { padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; width:100%; }
+        button { background:#007bff; color:white; border:none; cursor:pointer; }
+        button:hover { background:#0056b3; }
+        .message { text-align:center; padding:10px; border-radius:5px; margin-bottom:15px; }
+        .success { background-color:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .error { background-color:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>User Panel</h2>
+    <a href="/dashboard_user">Dashboard</a>
+    <a href="/profile_user">My Profile</a>
+    <a href="/avatars_user">Avatar Interaction</a>
+    <a href="/subscription_user">Subscription</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="content">
+    <h1>Welcome, {{ user.name }}!</h1>
+
+    <!-- Flash Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- =================== SUBSCRIPTION =================== -->
+    <h2 id="subscription">Subscription Status</h2>
+    {% if subscription %}
+        <p>Plan: {{ subscription.name }}</p>
+        <p>Price: {{ subscription.price }}</p>
+        <p>Duration: {{ subscription.duration_days }} days</p>
+    {% else %}
+        <p>You do not have an active subscription.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

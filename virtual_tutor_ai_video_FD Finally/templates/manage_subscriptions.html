@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Subscriptions - Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin:0; padding:0; }
+        .sidebar { width:220px; height:100vh; background:#007bff; position:fixed; top:0; left:0; color:white; display:flex; flex-direction:column; }
+        .sidebar h2 { text-align:center; padding:20px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
+        .sidebar a { padding:15px 20px; text-decoration:none; color:white; border-bottom:1px solid rgba(255,255,255,0.1); transition:0.3s; }
+        .sidebar a:hover { background-color:#0056b3; }
+        .content { margin-left:220px; padding:30px; }
+        table { width:100%; border-collapse:collapse; margin-bottom:30px; }
+        th, td { border:1px solid #ccc; padding:10px; text-align:left; }
+        th { background:#f4f4f4; }
+        input, button { padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; width:100%; }
+        button { background:#28a745; color:white; border:none; cursor:pointer; }
+        button:hover { background:#1e7e34; }
+        .message { text-align:center; padding:10px; border-radius:5px; margin-bottom:15px; }
+        .success { background-color: #d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+        h3 { margin-top:40px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Admin Panel</h2>
+    <a href="/dashboard_admin">Dashboard</a>
+    <a href="/manage_users">Manage Users</a>
+    <a href="/manage_subscriptions">Manage Subscriptions</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="content">
+    <h1>Manage Subscriptions</h1>
+
+    <!-- Flash Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Add New Subscription Form -->
+    <h3>Add New Subscription</h3>
+    <form action="/manage_subscriptions" method="POST">
+        <input type="hidden" name="action" value="add">
+        <input type="text" name="name" placeholder="Subscription Name" required>
+        <input type="number" step="0.01" name="price" placeholder="Price" required>
+        <input type="number" name="duration_days" placeholder="Duration (days)" required>
+        <button type="submit">Add Subscription</button>
+    </form>
+
+    <!-- Existing Subscriptions Table -->
+    <h3>Existing Subscriptions</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Duration (days)</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+        {% for sub in subscriptions %}
+        <tr>
+            <td>{{ sub.id }}</td>
+            <td>{{ sub.name }}</td>
+            <td>{{ sub.price }}</td>
+            <td>{{ sub.duration_days }}</td>
+            <td>{{ sub.created_at }}</td>
+            <td>
+                <a href="/edit_subscription/{{ sub.id }}">Edit</a> |
+                <a href="/delete_subscription/{{ sub.id }}" onclick="return confirm('Are you sure you want to delete this subscription?')">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Subscription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+        .container {
+            width: 420px;
+            margin: 60px auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 12px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+        }
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .back {
+            text-align: center;
+            margin-top: 12px;
+        }
+        .back a {
+            text-decoration: none;
+            color: #555;
+        }
+        .flash {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Edit Subscription</h2>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label>Subscription Name</label>
+        <input type="text" name="name" value="{{ subscription.name }}" required>
+
+        <label>Price</label>
+        <input type="number" step="0.01" name="price" value="{{ subscription.price }}" required>
+
+        <label>Duration (Days)</label>
+        <input type="number" name="duration_days" value="{{ subscription.duration_days }}" required>
+
+        <button type="submit">Update Subscription</button>
+    </form>
+
+    <div class="back">
+        <a href="{{ url_for('manage_subscriptions') }}">← Back to Subscriptions</a>
+    </div>
+</div>
+
+</body>
+</html>
